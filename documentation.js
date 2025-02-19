@@ -12,7 +12,7 @@ const documentation = `
     </style>
 </head>
 <body>
-    <h1>User Controller API Documentation</h1>
+    <h1>API Documentation</h1>
 
     <h2>1. Register User</h2>
     <p><strong>Method:</strong> POST</p>
