@@ -101,4 +101,28 @@ const agentReply = asyncHandler(async (req, res) => {
     res.status(201).json(agentMessage);
 });
 
-module.exports = { startChat, sendMessage, getChatMessages, agentReply };
+const getAgentChatList = asyncHandler(async (req, res) => {
+    const chatSessions = await ChatSession.find({ status: "open" }).select("sessionId customerId status");
+
+    if (!chatSessions.length) {
+        return res.status(404).json({ message: "No active chat sessions found" });
+    }
+
+    res.status(200).json(chatSessions);
+});
+
+const closeChat = asyncHandler(async (req, res) => {
+    const { sessionId } = req.body;
+
+    const chatSession = await ChatSession.findOne({ sessionId });
+    if (!chatSession) {
+        return res.status(404).json({ message: "Chat session not found" });
+    }
+
+    chatSession.status = "closed";
+    await chatSession.save();
+
+    res.status(200).json({ message: "Chat session closed successfully" });
+});
+
+module.exports = { startChat, sendMessage, getChatMessages, agentReply, getAgentChatList , closeChat};

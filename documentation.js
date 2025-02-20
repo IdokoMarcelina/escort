@@ -190,99 +190,127 @@ const documentation = `
 
      <h2>Chat Endpoints</h2>
 
-    <h3>1. Start a Chat Session</h3>
+
+    <h2>1. Start a Chat</h2>
     <p><strong>Method:</strong> POST</p>
-    <p><strong>Endpoint:</strong> <code>https://escort-1.onrender.com/api/chats/start-chat</code></p>
-    <p><strong>Description:</strong> Starts a new chat session for a customer.</p>
+    <p><strong>Endpoint:</strong> <code>https://escort-1.onrender.com/api/chat/start-chat</code></p>
+    <p><strong>Description:</strong> Starts a new chat session for a customer and returns the session ID.</p>
     <pre>
     Request Body:
     {
-        "customerId": "customer_unique_id"
+        "customerId": "customer_123"
     }
 
     Response:
     {
-        "sessionId": "chat_session_id",
-        "customerId": "customer_unique_id",
-        "status": "active"
+        "sessionId": "session_uuid",
+        "welcomeMessage": {
+            "_id": "message_id",
+            "sessionId": "session_uuid",
+            "sender": "agent",
+            "message": "Welcome! How can we help you today?"
+        }
     }
     </pre>
 
-    <h3>2. Send a Message</h3>
+    <h2>2. Send a Message (Customer)</h2>
     <p><strong>Method:</strong> POST</p>
-    <p><strong>Endpoint:</strong> <code>https://escort-1.onrender.com/api/chats/send-message</code></p>
-    <p><strong>Description:</strong> Sends a message from a customer or an agent.</p>
+    <p><strong>Endpoint:</strong> <code>https://escort-1.onrender.com/api/chat/send-message</code></p>
+    <p><strong>Description:</strong> Allows a customer to send a message in an active chat session.</p>
     <pre>
     Request Body:
     {
-        "sessionId": "chat_session_id",
-        "sender": "customer | agent",
-        "message": "Hello, how can I help you?"
+        "sessionId": "session_uuid",
+        "message": "Hello, I need help with my order."
     }
 
     Response:
     {
-        "messageId": "message_unique_id",
-        "sessionId": "chat_session_id",
-        "sender": "customer | agent",
-        "message": "Hello, how can I help you?",
-        "timestamp": "2025-02-20T12:00:00Z"
+        "_id": "message_id",
+        "sessionId": "session_uuid",
+        "sender": "customer",
+        "message": "Hello, I need help with my order."
     }
     </pre>
 
-    <h3>3. Get All Chat Sessions</h3>
+    <h2>3. Get Chat Messages</h2>
     <p><strong>Method:</strong> GET</p>
-    <p><strong>Endpoint:</strong> <code>https://escort-1.onrender.com/api/chats/get-sessions</code></p>
-    <p><strong>Description:</strong> Fetches all active chat sessions.</p>
+    <p><strong>Endpoint:</strong> <code>https://escort-1.onrender.com/api/chat/chat/:sessionId</code></p>
+    <p><strong>Description:</strong> Fetches all messages from a specific chat session.</p>
     <pre>
     Response:
     [
         {
-            "sessionId": "chat_session_id",
-            "customerId": "customer_unique_id",
-            "status": "active"
+            "_id": "message_id",
+            "sessionId": "session_uuid",
+            "sender": "customer",
+            "message": "Hello, I need help with my order."
+        },
+        {
+            "_id": "message_id",
+            "sessionId": "session_uuid",
+            "sender": "agent",
+            "message": "Sure! What seems to be the problem?"
         }
     ]
     </pre>
 
-    <h3>4. Get Chat Messages</h3>
-    <p><strong>Method:</strong> GET</p>
-    <p><strong>Endpoint:</strong> <code>https://escort-1.onrender.com/api/chats/get-messages/:sessionId</code></p>
-    <p><strong>Description:</strong> Retrieves messages for a specific chat session.</p>
-    <pre>
-    Response:
-    {
-        "sessionId": "chat_session_id",
-        "messages": [
-            {
-                "messageId": "message_unique_id",
-                "sender": "customer",
-                "message": "Hello, I need help!",
-                "timestamp": "2025-02-20T12:00:00Z"
-            },
-            {
-                "messageId": "message_unique_id",
-                "sender": "agent",
-                "message": "Sure! How can I assist?",
-                "timestamp": "2025-02-20T12:01:00Z"
-            }
-        ]
-    }
-    </pre>
-
-    <h3>5. End a Chat Session</h3>
+    <h2>4. Agent Reply</h2>
     <p><strong>Method:</strong> POST</p>
-    <p><strong>Endpoint:</strong> <code>https://escort-1.onrender.com/api/chats/end-chat</code></p>
-    <p><strong>Description:</strong> Ends a chat session.</p>
+    <p><strong>Endpoint:</strong> <code>https://escort-1.onrender.com/api/chat/agent-reply</code></p>
+    <p><strong>Authentication:</strong> Protected (Agent Only)</p>
+    <p><strong>Description:</strong> Allows an agent to reply to a customer in a chat session.</p>
     <pre>
     Request Body:
     {
-        "sessionId": "chat_session_id"
+        "sessionId": "session_uuid",
+        "message": "How can I assist you?"
     }
 
     Response:
     {
-        "message": "Chat session ended successfully"
+        "_id": "message_id",
+        "sessionId": "session_uuid",
+        "sender": "agent",
+        "message": "How can I assist you?"
+    }
+    </pre>
+
+    <h2>5. Get Agent Chat List</h2>
+    <p><strong>Method:</strong> POST</p>
+    <p><strong>Endpoint:</strong> <code>https://escort-1.onrender.com/api/chat/agent-chat-list</code></p>
+    <p><strong>Authentication:</strong> Protected (Agent Only)</p>
+    <p><strong>Description:</strong> Fetches a list of active chat sessions assigned to the agent.</p>
+    <pre>
+    Response:
+    [
+        {
+            "sessionId": "session_uuid",
+            "customerId": "customer_123",
+            "status": "open"
+        },
+        {
+            "sessionId": "session_uuid_2",
+            "customerId": "customer_456",
+            "status": "open"
+        }
+    ]
+    </pre>
+
+    <h2>6. Close a Chat</h2>
+    <p><strong>Method:</strong> POST</p>
+    <p><strong>Endpoint:</strong> <code>https://escort-1.onrender.com/api/chat/close-chat</code></p>
+    <p><strong>Authentication:</strong> Protected (Agent Only)</p>
+    <p><strong>Description:</strong> Closes an active chat session.</p>
+    <pre>
+    Request Body:
+    {
+        "sessionId": "session_uuid"
+    }
+
+    Response:
+    {
+        "message": "Chat session closed successfully"
     }
     </pre>
 
